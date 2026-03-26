@@ -1,18 +1,24 @@
-# Law School Dashboard
+# Free Law Admissions Prompt Studio
 
-This folder is a clean GitHub-ready version of the law school application dashboard.
+This is the free local version of the law admissions tool.
 
-## Files
+## What It Does
 
-- `index.html` — the full standalone dashboard page
+- generates copy-ready admissions review prompts
+- supports school packs for Cleveland State, Capital, Dayton, and general JD strategy
+- helps with dossier review, red flags, overlap, essay revision, scholarships, and interviews
+- saves your choices locally in the browser
 
-## Upload To GitHub
+## What It Does Not Do
 
-1. Create a new GitHub repository.
-2. Upload the contents of this folder.
-3. In the repo settings, enable GitHub Pages from the default branch root.
-4. Your site will load from `index.html`.
+- it does not call a paid API
+- it does not analyze files automatically
+- it is meant to help you run stronger manual reviews in ChatGPT Free
 
-## Suggested Repo Name
+## How To Use
 
-- `law-school-dashboard`
+1. Open `index.html`.
+2. Choose a mode and school pack.
+3. Add your goal and any excerpts or notes.
+4. Click `Generate Prompt`.
+5. Copy the result into ChatGPT Free and paste or upload your materials there if available.

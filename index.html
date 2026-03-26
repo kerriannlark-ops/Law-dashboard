@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kerri — Free Law Admissions Prompt Studio</title>
+  <meta name="theme-color" content="#f6efe3">
+  <style>
+    :root {
+      --bg: #f6efe3;
+      --surface: rgba(255, 251, 245, 0.82);
+      --surface-strong: #fffdf9;
+      --ink: #231914;
+      --muted: #6c625b;
+      --line: rgba(61, 42, 31, 0.12);
+      --accent: #9c5336;
+      --accent-soft: rgba(156, 83, 54, 0.12);
+      --deep: #261f1c;
+      --sage: #36584a;
+      --gold: #c49545;
+      --shadow: 0 22px 52px rgba(83, 56, 34, 0.12);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(156, 83, 54, 0.15), transparent 25%),
+        radial-gradient(circle at top right, rgba(54, 88, 74, 0.12), transparent 22%),
+        linear-gradient(180deg, #fdf7ed 0%, #f4ebde 44%, #eee1cf 100%);
+    }
+
+    .shell {
+      width: min(1260px, calc(100% - 28px));
+      margin: 16px auto 28px;
+    }
+
+    .hero,
+    .panel,
+    .notes-panel,
+    .output-panel,
+    .guide-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      padding: 26px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 0.74rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin: 12px 0 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.5rem, 4vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-copy,
+    .subtle {
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .hero-copy {
+      max-width: 780px;
+      font-size: 1rem;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .mini-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(61, 42, 31, 0.08);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .guide-panel {
+      padding: 22px;
+      background: linear-gradient(180deg, #271f1b 0%, #352923 100%);
+      color: rgba(255, 247, 241, 0.92);
+    }
+
+    .guide-panel h2 {
+      margin: 10px 0 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2rem;
+      line-height: 1.04;
+    }
+
+    .guide-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .guide-step {
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.1);
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 18px;
+      margin-top: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .notes-panel,
+    .output-panel {
+      padding: 24px;
+    }
+
+    .section-title {
+      margin: 8px 0 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2rem;
+      line-height: 1.08;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .option-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .choice {
+      display: block;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.62);
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+    }
+
+    .choice:hover,
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .choice.active.mode-choice {
+      border-color: rgba(156, 83, 54, 0.45);
+      background: var(--accent-soft);
+      box-shadow: 0 16px 30px rgba(156, 83, 54, 0.08);
+    }
+
+    .choice.active.school-choice {
+      border-color: rgba(38, 31, 28, 0.6);
+      background: linear-gradient(180deg, #2a221f 0%, #382c27 100%);
+      color: rgba(255, 247, 241, 0.94);
+      box-shadow: 0 16px 30px rgba(38, 31, 28, 0.16);
+    }
+
+    .choice-title {
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    .choice-meta {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .school-choice.active .choice-meta {
+      color: rgba(255, 247, 241, 0.62);
+    }
+
+    .choice-body {
+      margin-top: 6px;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: inherit;
+      opacity: 0.86;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid rgba(61, 42, 31, 0.14);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 14px 15px;
+      font: inherit;
+      color: var(--ink);
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: 3px solid rgba(156, 83, 54, 0.16);
+      border-color: rgba(156, 83, 54, 0.44);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      background: var(--deep);
+      color: #fff7f1;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .button.ghost {
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .note-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .note-pill {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(61, 42, 31, 0.08);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .output-panel {
+      min-height: 740px;
+      background: linear-gradient(180deg, rgba(255, 252, 247, 0.94) 0%, rgba(251, 245, 236, 0.94) 100%);
+    }
+
+    .output-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .status-pill {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(61, 42, 31, 0.08);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .prompt-box,
+    .checklist-box {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(61, 42, 31, 0.08);
+      line-height: 1.75;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      color: #3c312d;
+    }
+
+    .prompt-box {
+      min-height: 340px;
+    }
+
+    .placeholder {
+      color: var(--muted);
+    }
+
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .package-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(61, 42, 31, 0.08);
+    }
+
+    .package-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .tiny {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 18px, 100%);
+        margin-top: 10px;
+      }
+
+      .hero,
+      .panel,
+      .notes-panel,
+      .output-panel,
+      .guide-panel {
+        padding: 18px;
+        border-radius: 24px;
+      }
+
+      .mini-grid,
+      .package-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Free Version</p>
+        <h1>Generate smarter law school prompts without paying for an API app.</h1>
+        <p class="hero-copy">
+          This version stays local and free. It does not call any paid API. Instead, it builds
+          school-specific, admissions-grade prompts you can paste into ChatGPT Free or another
+          chat tool. It also keeps your package strategy in one place so you can review your
+          statement, resume, and transcripts with more intention.
+        </p>
+        <div class="mini-grid">
+          <div class="mini-card">Built around your current package: statement, resume, Kent State transcript, and Clark Atlanta transcript.</div>
+          <div class="mini-card">Includes school packs for Cleveland State, Capital, Dayton, plus a general JD strategy mode.</div>
+          <div class="mini-card">Generates copy-ready prompts for dossier review, red flags, overlap checks, scholarships, and interviews.</div>
+          <div class="mini-card">Keeps everything local in the browser, so no paid API key is needed.</div>
+        </div>
+      </div>
+      <div class="hero-side">
+        <section class="guide-panel">
+          <p class="eyebrow" style="color: rgba(255,247,241,0.55);">How To Use</p>
+          <h2>Use this with ChatGPT Free manually.</h2>
+          <div class="guide-list">
+            <div class="guide-step">1. Choose a review mode and school strategy pack.</div>
+            <div class="guide-step">2. Paste in any extra context or excerpts you want reviewed.</div>
+            <div class="guide-step">3. Click <strong>Generate Prompt</strong>.</div>
+            <div class="guide-step">4. Copy the prompt into ChatGPT and add your files or excerpts there if available.</div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="stack">
+        <section class="panel stack">
+          <div>
+            <p class="eyebrow">Prompt Studio</p>
+            <h2 class="section-title">Choose the exact kind of admissions help you want.</h2>
+            <p class="subtle">
+              Start with dossier review, then move into red-flag detection, school fit, overlap, or scholarship prep.
+            </p>
+          </div>
+
+          <div class="field">
+            <label>Review Mode</label>
+            <div class="option-grid" id="mode-grid"></div>
+          </div>
+
+          <div class="field">
+            <label>School Strategy Pack</label>
+            <div class="option-grid" id="school-grid"></div>
+          </div>
+
+          <div class="field">
+            <label for="target-school">Target School Or Program</label>
+            <input id="target-school" type="text" placeholder="Example: Cleveland State University Online JD">
+          </div>
+
+          <div class="field">
+            <label for="main-goal">What do you most want help with?</label>
+            <textarea id="main-goal" placeholder="Example: Tell me if my personal statement sounds too abstract, whether my academic path needs an addendum, and how to make my legal assistant experience work harder."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="excerpt-box">Optional excerpts or notes</label>
+            <textarea id="excerpt-box" placeholder="Paste part of your statement, resume bullets, school prompt text, or any notes you want the chat to focus on."></textarea>
+          </div>
+
+          <div class="button-row">
+            <button class="button" id="generate-button" type="button">Generate Prompt</button>
+            <button class="button ghost" id="copy-button" type="button">Copy Prompt</button>
+            <button class="button ghost" id="reset-button" type="button">Reset</button>
+          </div>
+
+          <div class="tiny">
+            Best free workflow: generate the prompt here, then paste it into ChatGPT Free along with the relevant document text or uploaded files if your chat interface supports uploads.
+          </div>
+        </section>
+
+        <section class="notes-panel stack">
+          <div>
+            <p class="eyebrow">Package Snapshot</p>
+            <h2 class="section-title">Your current strongest signals</h2>
+          </div>
+          <div class="package-grid">
+            <div class="package-card">
+              <strong>Academic story</strong>
+              <div class="tiny">Clark Atlanta University, B.A. in Political Science, Magna Cum Laude. Kent State Associate of Arts via dual enrollment.</div>
+            </div>
+            <div class="package-card">
+              <strong>Current legal experience</strong>
+              <div class="tiny">Legal Assistant at MDK Legal, after Buckeye Law Group and Galloway Law Firm.</div>
+            </div>
+            <div class="package-card">
+              <strong>Personal statement core</strong>
+              <div class="tiny">Resilience, institutional reform, disability advocacy, and rights that only matter when people know how to enforce them.</div>
+            </div>
+            <div class="package-card">
+              <strong>Research and leadership</strong>
+              <div class="tiny">UNCF K-12 Education Fellowship, Lowery Institute change agent work, senior thesis on redlining and structural inequality.</div>
+            </div>
+          </div>
+          <div class="note-row">
+            <span class="note-pill">Good first prompt: dossier review</span>
+            <span class="note-pill">Then run: red flag detector</span>
+            <span class="note-pill">Then switch to: school fit</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="output-panel">
+        <div class="output-head">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2 class="section-title">Copy-Ready Prompt</h2>
+          </div>
+          <div class="status-pill" id="status-pill">Ready</div>
+        </div>
+
+        <div class="prompt-box placeholder" id="prompt-box">
+Generate a prompt and it will appear here.
+        </div>
+
+        <div class="output-head" style="margin-top: 20px;">
+          <div>
+            <p class="eyebrow">Support</p>
+            <h2 class="section-title">Suggested Next Actions</h2>
+          </div>
+        </div>
+
+        <div class="checklist-box placeholder" id="checklist-box">
+Your recommended follow-up steps will appear here after you generate a prompt.
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    const modes = [
+      { value: "dossier", label: "Dossier Review", description: "Get a full admissions-style read on strengths, risks, and next steps." },
+      { value: "school-fit", label: "School Fit", description: "Tailor your package to a specific law school and surface missing alignment." },
+      { value: "red-flags", label: "Red Flag Detector", description: "Surface timeline, grade, or credibility questions an admissions reader may raise." },
+      { value: "overlap", label: "Overlap Check", description: "See whether your resume and personal statement reinforce each other or repeat weakly." },
+      { value: "essay-revision", label: "Essay Revision", description: "Strengthen your personal statement without flattening your voice." },
+      { value: "scholarship", label: "Scholarship Prep", description: "Highlight merit signals, service themes, and stories that can support scholarship positioning." },
+      { value: "interview", label: "Interview Prep", description: "Generate likely admissions questions and answer angles grounded in your materials." }
+    ];
+
+    const schools = [
+      {
+        value: "general",
+        label: "General JD Strategy",
+        schoolName: "General law school application strategy",
+        format: "Broad-use",
+        summary: "Use this when you want admissions guidance that is portable across multiple part-time, hybrid, or online programs.",
+        fitAngles: [
+          "Show a coherent why-law narrative with concrete evidence.",
+          "Demonstrate academic readiness, maturity, and professional judgment.",
+          "Address transcript concerns before the committee has to guess."
+        ]
+      },
+      {
+        value: "csu-online-jd",
+        label: "Cleveland State Online JD",
+        schoolName: "Cleveland State University College of Law Online JD",
+        format: "Online · Part-time",
+        summary: "This option rewards self-direction, practical legal interest, and evidence that the applicant can manage rigorous study while working.",
+        fitAngles: [
+          "Emphasize discipline, independent structure, and consistency under pressure.",
+          "Connect legal assistant work to readiness for applied legal training.",
+          "Tie institutional reform themes to community impact."
+        ]
+      },
+      {
+        value: "capital-law",
+        label: "Capital Law",
+        schoolName: "Capital University Law School",
+        format: "In-person · Part-time",
+        summary: "This option benefits from a strong local-practice story, professional maturity, and evidence of commitment to the Ohio legal community.",
+        fitAngles: [
+          "Lean into Columbus-based legal work and notary operations.",
+          "Show long-term Ohio practice intentions.",
+          "Highlight readiness for part-time rigor while working."
+        ]
+      },
+      {
+        value: "dayton-law",
+        label: "Dayton Law",
+        schoolName: "University of Dayton School of Law",
+        format: "Hybrid · Part-time",
+        summary: "This option benefits from a flexible-but-serious story: regional commitment, practical motivation, and disciplined follow-through.",
+        fitAngles: [
+          "Connect hybrid flexibility to sustained performance, not convenience alone.",
+          "Show how service and legal support work translate into practice-oriented legal education.",
+          "Address work-study-commute management with intention."
+        ]
+      }
+    ];
+
+    const packageFacts = [
+      "Current package includes a personal statement, admissions resume, Kent State transcript, and Clark Atlanta transcript.",
+      "Clark Atlanta degree: B.A. in Political Science, Magna Cum Laude, degree awarded May 18, 2024.",
+      "Kent State degree: Associate of Arts, degree awarded August 19, 2023, degree GPA listed as 3.453.",
+      "Current legal experience includes MDK Legal, Buckeye Law Group, and Galloway Law Firm.",
+      "Personal statement themes include resilience, institutional reform, disability advocacy, policy, rights enforcement, and applied legal purpose.",
+      "Resume signals include legal workflow support, research, honors, leadership, policy fellowship work, and fluent Spanish."
+    ];
+
+    const modeGrid = document.getElementById("mode-grid");
+    const schoolGrid = document.getElementById("school-grid");
+    const targetSchoolInput = document.getElementById("target-school");
+    const mainGoalInput = document.getElementById("main-goal");
+    const excerptBox = document.getElementById("excerpt-box");
+    const promptBox = document.getElementById("prompt-box");
+    const checklistBox = document.getElementById("checklist-box");
+    const statusPill = document.getElementById("status-pill");
+    const generateButton = document.getElementById("generate-button");
+    const copyButton = document.getElementById("copy-button");
+    const resetButton = document.getElementById("reset-button");
+
+    let activeMode = "dossier";
+    let activeSchool = "general";
+
+    function getSchoolProfile(value) {
+      return schools.find((school) => school.value === value) || schools[0];
+    }
+
+    function renderModes() {
+      modeGrid.innerHTML = modes.map((mode) => `
+        <label class="choice mode-choice ${mode.value === activeMode ? "active" : ""}" data-mode="${mode.value}">
+          <input class="sr-only" type="radio" name="mode" value="${mode.value}" ${mode.value === activeMode ? "checked" : ""}>
+          <div class="choice-title">${mode.label}</div>
+          <div class="choice-body">${mode.description}</div>
+        </label>
+      `).join("");
+    }
+
+    function renderSchools() {
+      schoolGrid.innerHTML = schools.map((school) => `
+        <label class="choice school-choice ${school.value === activeSchool ? "active" : ""}" data-school="${school.value}">
+          <input class="sr-only" type="radio" name="school" value="${school.value}" ${school.value === activeSchool ? "checked" : ""}>
+          <div class="choice-title">${school.label}</div>
+          <div class="choice-meta">${school.format}</div>
+          <div class="choice-body">${school.summary}</div>
+        </label>
+      `).join("");
+    }
+
+    function setStatus(label) {
+      statusPill.textContent = label;
+    }
+
+    function buildModeInstructions(mode) {
+      if (mode === "school-fit") {
+        return [
+          "Evaluate how well this package matches the target school.",
+          "Point out what already aligns and what still feels generic or under-tailored.",
+          "Recommend school-specific revisions to the statement, resume, and framing."
+        ];
+      }
+      if (mode === "red-flags") {
+        return [
+          "Act like an admissions reader looking for reasons to hesitate.",
+          "Surface any transcript, chronology, maturity, or credibility questions.",
+          "Tell me whether each issue needs an addendum, a rewrite, or better framing."
+        ];
+      }
+      if (mode === "overlap") {
+        return [
+          "Compare the resume and personal statement as one application story.",
+          "Show where they reinforce each other well and where they repeat without adding value.",
+          "Recommend specific storyline fixes."
+        ];
+      }
+      if (mode === "essay-revision") {
+        return [
+          "Revise the personal statement for clarity, specificity, structure, and stronger law-school positioning.",
+          "Keep my voice intact and avoid flattening it into generic admissions language.",
+          "Point to weak abstractions, missing evidence, and stronger rewrites."
+        ];
+      }
+      if (mode === "scholarship") {
+        return [
+          "Identify the strongest scholarship-worthy signals in my record.",
+          "Tell me which stories and achievements should anchor merit or service-based scholarship essays.",
+          "Flag what needs stronger proof or framing."
+        ];
+      }
+      if (mode === "interview") {
+        return [
+          "Generate likely admissions and scholarship interview questions based on my file.",
+          "Explain what in my materials would trigger each question.",
+          "Give concise, credible answer angles I can practice."
+        ];
+      }
+      return [
+        "Review the full package like a law school admissions strategist.",
+        "Identify strongest signals, likely concerns, and the biggest revision priorities.",
+        "Give direct, practical next steps."
+      ];
+    }
+
+    function buildChecklist(mode, school) {
+      const base = [
+        "Review the generated prompt before pasting it into ChatGPT.",
+        "Include the most relevant document text or upload the matching files in your chat if available.",
+        "Save the best output and turn it into concrete revisions, not just notes."
+      ];
+
+      if (mode === "red-flags") {
+        base.push("Write down any issue that might require an addendum.");
+        base.push("Check whether your statement or resume already answers the concern indirectly.");
+      } else if (mode === "school-fit") {
+        base.push(`List 2-3 reasons ${school.label} is a real fit for you.`);
+        base.push("Tailor one paragraph of the statement and one resume section after reviewing the response.");
+      } else if (mode === "overlap") {
+        base.push("Cut repeated material from the weaker document.");
+        base.push("Make sure each document contributes a different kind of value.");
+      } else if (mode === "scholarship") {
+        base.push("Pull out your strongest leadership, service, and resilience examples.");
+        base.push("Draft a scholarship-specific story bank after the review.");
+      } else if (mode === "interview") {
+        base.push("Practice the generated questions out loud.");
+        base.push("Tighten any answer that sounds vague, overlong, or too abstract.");
+      }
+
+      return base.map((item) => `- ${item}`).join("\n");
+    }
+
+    function buildPrompt() {
+      const school = getSchoolProfile(activeSchool);
+      const customTarget = targetSchoolInput.value.trim();
+      const mainGoal = mainGoalInput.value.trim();
+      const excerpts = excerptBox.value.trim();
+      const instructions = buildModeInstructions(activeMode);
+
+      const prompt = [
+        "You are an experienced law school admissions strategist.",
+        "",
+        "I want you to review my law school application materials.",
+        "",
+        "Applicant package facts:",
+        ...packageFacts.map((fact) => `- ${fact}`),
+        "",
+        `Target school strategy pack: ${school.label}`,
+        `Program format emphasis: ${school.format}`,
+        `School summary: ${school.summary}`,
+        "School fit angles:",
+        ...school.fitAngles.map((angle) => `- ${angle}`),
+        "",
+        customTarget
+          ? `Custom target school or program note: ${customTarget}`
+          : `Primary target: ${school.schoolName}`,
+        "",
+        "What I want help with:",
+        ...(mainGoal ? [`- ${mainGoal}`] : ["- Give me a strong admissions review of this package."]),
+        "",
+        "Instructions for this review:",
+        ...instructions.map((item) => `- ${item}`),
+        "",
+        "Important constraints:",
+        "- Ground every claim in the materials I provide.",
+        "- Do not invent facts.",
+        "- Explain why each concern matters in admissions terms.",
+        "- Prefer practical, direct advice over generic praise.",
+        "- Mention if something needs an addendum, stronger framing, or clearer evidence.",
+        "",
+        excerpts
+          ? `Additional excerpts or notes from me:\n${excerpts}\n`
+          : "I will paste or upload the relevant statement, resume, transcript excerpts, or school prompt after this instruction.\n",
+        "Return the answer in markdown with these sections:",
+        "## Snapshot",
+        "## Strongest Signals",
+        "## Risks Or Questions",
+        "## Revision Priorities",
+        "## Next Moves"
+      ];
+
+      if (activeMode === "school-fit") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## School Fit Signals";
+        prompt[prompt.length - 3] = "## Weak Or Missing Alignment";
+        prompt[prompt.length - 2] = "## Tailoring Moves";
+        prompt[prompt.length - 1] = "## Next Moves";
+      } else if (activeMode === "red-flags") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## Possible Red Flags";
+        prompt[prompt.length - 3] = "## How Serious They Are";
+        prompt[prompt.length - 2] = "## Best Addendum Or Framing Moves";
+        prompt[prompt.length - 1] = "## Next Moves";
+      } else if (activeMode === "overlap") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## Strong Reinforcement";
+        prompt[prompt.length - 3] = "## Repetition Or Gaps";
+        prompt[prompt.length - 2] = "## Storyline Fixes";
+        prompt[prompt.length - 1] = "## Next Moves";
+      } else if (activeMode === "essay-revision") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## What Already Works";
+        prompt[prompt.length - 3] = "## Revision Priorities";
+        prompt[prompt.length - 2] = "## Suggested Reframes";
+        prompt[prompt.length - 1] = "## Next Moves";
+      } else if (activeMode === "scholarship") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## Scholarship-Worthy Signals";
+        prompt[prompt.length - 3] = "## Stories To Lean On";
+        prompt[prompt.length - 2] = "## What Needs Better Proof";
+        prompt[prompt.length - 1] = "## Next Moves";
+      } else if (activeMode === "interview") {
+        prompt[prompt.length - 5] = "## Snapshot";
+        prompt[prompt.length - 4] = "## Likely Questions";
+        prompt[prompt.length - 3] = "## What Will Prompt Those Questions";
+        prompt[prompt.length - 2] = "## Strong Answer Angles";
+        prompt[prompt.length - 1] = "## Next Moves";
+      }
+
+      return prompt.join("\n");
+    }
+
+    modeGrid.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-mode]");
+      if (!card) return;
+      activeMode = card.getAttribute("data-mode");
+      renderModes();
+    });
+
+    schoolGrid.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-school]");
+      if (!card) return;
+      activeSchool = card.getAttribute("data-school");
+      const school = getSchoolProfile(activeSchool);
+      if (activeSchool !== "general") {
+        targetSchoolInput.value = school.schoolName;
+      }
+      renderSchools();
+    });
+
+    generateButton.addEventListener("click", () => {
+      const school = getSchoolProfile(activeSchool);
+      const prompt = buildPrompt();
+      const checklist = buildChecklist(activeMode, school);
+
+      promptBox.textContent = prompt;
+      checklistBox.textContent = checklist;
+      promptBox.classList.remove("placeholder");
+      checklistBox.classList.remove("placeholder");
+      setStatus("Prompt Ready");
+
+      localStorage.setItem("lawAdmissionsFreePrompt", prompt);
+      localStorage.setItem("lawAdmissionsFreeChecklist", checklist);
+      localStorage.setItem("lawAdmissionsFreeGoal", mainGoalInput.value);
+      localStorage.setItem("lawAdmissionsFreeExcerpts", excerptBox.value);
+      localStorage.setItem("lawAdmissionsFreeTarget", targetSchoolInput.value);
+      localStorage.setItem("lawAdmissionsFreeMode", activeMode);
+      localStorage.setItem("lawAdmissionsFreeSchool", activeSchool);
+    });
+
+    copyButton.addEventListener("click", async () => {
+      const text = promptBox.textContent.trim();
+      if (!text || promptBox.classList.contains("placeholder")) {
+        setStatus("Generate First");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("Copied");
+      } catch (error) {
+        setStatus("Copy Failed");
+      }
+    });
+
+    resetButton.addEventListener("click", () => {
+      activeMode = "dossier";
+      activeSchool = "general";
+      targetSchoolInput.value = "";
+      mainGoalInput.value = "";
+      excerptBox.value = "";
+      promptBox.textContent = "Generate a prompt and it will appear here.";
+      checklistBox.textContent = "Your recommended follow-up steps will appear here after you generate a prompt.";
+      promptBox.classList.add("placeholder");
+      checklistBox.classList.add("placeholder");
+      setStatus("Ready");
+      localStorage.removeItem("lawAdmissionsFreePrompt");
+      localStorage.removeItem("lawAdmissionsFreeChecklist");
+      localStorage.removeItem("lawAdmissionsFreeGoal");
+      localStorage.removeItem("lawAdmissionsFreeExcerpts");
+      localStorage.removeItem("lawAdmissionsFreeTarget");
+      localStorage.removeItem("lawAdmissionsFreeMode");
+      localStorage.removeItem("lawAdmissionsFreeSchool");
+      renderModes();
+      renderSchools();
+    });
+
+    function hydrateFromStorage() {
+      const savedMode = localStorage.getItem("lawAdmissionsFreeMode");
+      const savedSchool = localStorage.getItem("lawAdmissionsFreeSchool");
+      const savedGoal = localStorage.getItem("lawAdmissionsFreeGoal");
+      const savedExcerpts = localStorage.getItem("lawAdmissionsFreeExcerpts");
+      const savedTarget = localStorage.getItem("lawAdmissionsFreeTarget");
+      const savedPrompt = localStorage.getItem("lawAdmissionsFreePrompt");
+      const savedChecklist = localStorage.getItem("lawAdmissionsFreeChecklist");
+
+      if (savedMode && modes.some((mode) => mode.value === savedMode)) {
+        activeMode = savedMode;
+      }
+
+      if (savedSchool && schools.some((school) => school.value === savedSchool)) {
+        activeSchool = savedSchool;
+      }
+
+      if (savedGoal) {
+        mainGoalInput.value = savedGoal;
+      }
+
+      if (savedExcerpts) {
+        excerptBox.value = savedExcerpts;
+      }
+
+      if (savedTarget) {
+        targetSchoolInput.value = savedTarget;
+      }
+
+      if (savedPrompt) {
+        promptBox.textContent = savedPrompt;
+        promptBox.classList.remove("placeholder");
+      }
+
+      if (savedChecklist) {
+        checklistBox.textContent = savedChecklist;
+        checklistBox.classList.remove("placeholder");
+      }
+    }
+
+    renderModes();
+    renderSchools();
+    hydrateFromStorage();
+  </script>
+</body>
+</html>
