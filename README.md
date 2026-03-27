@@ -11,6 +11,9 @@ This is the GitHub-ready version of the free law school admissions prompt genera
 - generates copy-ready prompts for law school application review
 - includes school packs for Cleveland State, Capital, Dayton, and general JD strategy
 - supports dossier review, red flag detection, overlap checks, essay revision, scholarship prep, and interview prep
+- includes an LSAT mechanism-verbs cheat sheet for argumentative writing
+- includes a law-admissions coaching section with package strengths, weaknesses, and training priorities
+- includes a highest-LSAT-score input for more tailored prompt generation
 - stores your selections locally in the browser
 
 ## Publish On GitHub Pages
